@@ -4,7 +4,7 @@ from rich.table import Table
 from pathlib import Path
 import docker
 import requests
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, CalledProcessError
 from question_flow import QuestionFlow
 from question_flow import ImageTag
 from dotenv import load_dotenv
@@ -107,10 +107,14 @@ def main():
         if q_reload:
             work_dir = env_file.get(qf.result['stack_step'], None)
             if work_dir:
-                print('reloading containers')
+                print('reloading containers...')
                 os.chdir(work_dir)
-                Popen(['sh', f'{work_dir}/restart.sh'], stdout=PIPE, stderr=PIPE).communicate()
-
+                #Popen(['sh', f'{work_dir}/restart.sh'], stdout=PIPE, stderr=PIPE).communicate()
+                with Popen(['sh',  f'{work_dir}/restart.sh'], stdout=PIPE, bufsize=1, universal_newlines=True) as p:
+                    for line in p.stdout:
+                        print(line, end='')
+                if p.returncode != 0:
+                    raise CalledProcessError(p.returncode, p.args)
 
 if __name__ == '__main__':
     main()
