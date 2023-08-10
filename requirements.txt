@@ -1,4 +1,4 @@
-rich==13.4.1
+rich==13.5.2
 docker==6.1.2
 inquirerpy==0.3.4
 python-dotenv==1.0.0
