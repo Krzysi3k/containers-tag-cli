@@ -38,7 +38,7 @@ class QuestionFlow:
         {
             "message": "choose stack",
             "type": "list",
-            "choices": ["homestack","chatops","go back", "cancel"],
+            "choices": ["homestack","chatops","wireguard","go back", "cancel"],
             "name": "stack_step",
             "default": "cancel",
             "when": lambda result: result["apply_step"]

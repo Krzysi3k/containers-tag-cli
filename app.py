@@ -18,7 +18,8 @@ client = docker.from_env()
 load_dotenv()
 env_file = {
     'homestack': os.environ['HOMESTACK_DOTENV_PATH'],
-    'chatops': os.environ['CHATOPS_DOTNEV_PATH']
+    'chatops': os.environ['CHATOPS_DOTNEV_PATH'],
+    'wireguard': os.environ['ALWAYS_ON_SERVICES']
 }
 
 
