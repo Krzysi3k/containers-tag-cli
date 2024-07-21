@@ -33,13 +33,11 @@ def get_images() -> list[str]:
     table.add_column("Image")
     table.add_column("Current Tag")
 
-    row_num = 1
     images = []
     _ = [ images.extend(i.tags) for i in client.images.list() ]
     sorted_imgs = sorted(images)
-    for image in sorted_imgs:
-        table.add_row(f"{row_num}", image.split(":")[0], image.split(":")[1])
-        row_num += 1
+    for idx, image in enumerate(sorted_imgs):
+        table.add_row(f"{idx+1}", image.split(":")[0], image.split(":")[1])
 
     console.print(table)
     return sorted_imgs
