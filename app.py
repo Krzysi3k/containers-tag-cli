@@ -120,4 +120,7 @@ def main():
                     raise CalledProcessError(p.returncode, p.args)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        os._exit(0)
