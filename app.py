@@ -12,6 +12,8 @@ from InquirerPy import inquirer
 import os
 import json
 import shutil
+from yaspin.spinners import Spinners
+from yaspin import yaspin
 
 
 client = docker.from_env()
@@ -47,15 +49,15 @@ def fetch_tags(images: list[str], page_size=100) -> list[ImageTag]:
     ignored_file = str(Path(__file__).parent) + '/.imageignore'
     with open(ignored_file, 'r') as ignored_file:
         images_ignored = ignored_file.read().split('\n')
-    console = Console()
     image_tags = []
-    with console.status('[bold green]fetching image tags...[/bold green]', spinner='dots2') as spn:
+    with yaspin(Spinners.sand, text="") as sp:
         for image in images:
             image_library = image.split(':')[0]
             if image_library in images_ignored:
                 continue
             if '/' not in image_library:
                 image_library = f'library/{image_library}'
+            sp.color, sp.text = 'magenta', f'fetching tags for: {image_library}'
             api_url = f'https://hub.docker.com/v2/repositories/{image_library}/tags?page_size={page_size}'
             r = requests.get(api_url)
             content = json.loads(r.content)
