@@ -55,7 +55,7 @@ def fetch_tags(images: list[str], page_size=100) -> list[ImageTag]:
                 continue
             if '/' not in image_library:
                 image_library = f'library/{image_library}'
-            sp.color, sp.text = 'green', f'fetching tags for: {image_library}'
+            sp.color, sp.text = 'white', f'fetching tags for: {image_library}'
             api_url = f'https://hub.docker.com/v2/repositories/{image_library}/tags?page_size={page_size}'
             r = requests.get(api_url)
             content = json.loads(r.content)
