@@ -1,6 +1,3 @@
-from rich.console import Console
-from rich import box
-from rich.table import Table
 from pathlib import Path
 import docker
 import requests
@@ -14,6 +11,7 @@ import json
 import shutil
 from yaspin.spinners import Spinners
 from yaspin import yaspin
+from tabulate import tabulate
 
 
 client = docker.from_env()
@@ -27,19 +25,17 @@ env_file = {
 
 def get_images() -> list[str]:
     os.system('clear')
-    console = Console()
-    table = Table(show_header=True, header_style="bold magenta", box=box.HEAVY)
-    table.add_column("Nr")
-    table.add_column("Image")
-    table.add_column("Current Tag")
-
     images = []
     _ = [ images.extend(i.tags) for i in client.images.list() ]
     sorted_imgs = sorted(images)
-    for idx, image in enumerate(sorted_imgs):
-        table.add_row(f"{idx+1}", image.split(":")[0], image.split(":")[1])
 
-    console.print(table)
+    rows = []
+    for idx, image in enumerate(sorted_imgs):
+        rows.append(
+            [ f"{idx+1}", image.split(":")[0], image.split(":")[1] ]
+        )
+    
+    print(tabulate(rows, headers=["Nr", "Image", "Current Tag"], tablefmt="psql"))
     return sorted_imgs
 
 
