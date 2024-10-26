@@ -52,10 +52,16 @@ def fetch_tags(images: list[str], page_size=100) -> list[ImageTag]:
             if '/' not in image_library:
                 image_library = f'library/{image_library}'
             sp.color, sp.text = 'white', f'fetching tags for: {image_library}'
-            api_url = f'https://hub.docker.com/v2/repositories/{image_library}/tags?page_size={page_size}'
-            r = requests.get(api_url)
-            content = json.loads(r.content)
-            tags = [ i['name'] for i in content['results'] ]
+            if 'ghcr.io' in image_library:
+                image_library = image.split('/')[1]
+                r = requests.get(f'https://api.github.com/repos/{image_library}/{image_library}/tags?per_page=100')
+                content = json.loads(r.content)
+                tags = [ i['name'] for i in content ]
+            else:
+                api_url = f'https://hub.docker.com/v2/repositories/{image_library}/tags?page_size={page_size}'
+                r = requests.get(api_url)
+                content = json.loads(r.content)
+                tags = [ i['name'] for i in content['results'] ]
             img_name, curr_tag = image.split(':')
             image_tags.append(
                 ImageTag(

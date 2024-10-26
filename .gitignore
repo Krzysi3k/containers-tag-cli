@@ -1,4 +1,5 @@
 .env
 .imageignore
 .venv/
+.vscode/
 __pycache__/
