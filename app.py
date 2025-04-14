@@ -105,6 +105,34 @@ def main():
             qf.result['tag_step'],
             qf.result['stack_step']
         )
+
+    if qf.result['stack_step'] != 'cancel':
+        q_pull = inquirer.confirm(message='pull new image?', default=True).execute()
+        if q_pull:
+            image_with_tag = f"{qf.result['image_step']}:{qf.result['tag_step']}"
+            print(f'pulling image: {image_with_tag}...')
+            with yaspin(Spinners.sand, text=f"Pulling {image_with_tag}") as sp:
+                try:
+                    with Popen(['docker', 'pull', image_with_tag], stdout=PIPE, stderr=PIPE, bufsize=1, universal_newlines=True) as p:
+                        for line in p.stdout:
+                            sp.text = f"Pulling {image_with_tag}: {line.strip()}"
+                    
+                    # Check if image exists after download using docker image inspect
+                    inspect_process = Popen(['docker', 'image', 'inspect', image_with_tag], 
+                                        stdout=PIPE, stderr=PIPE, universal_newlines=True)
+                    inspect_output, inspect_error = inspect_process.communicate()
+                    
+                    if inspect_process.returncode == 0:
+                        sp.ok("✅ ")
+                        print(f"Successfully pulled and verified {image_with_tag}")
+                    else:
+                        sp.fail("❌ ")
+                        print(f"Failed to verify image: {inspect_error.strip()}")
+                        
+                except Exception as e:
+                    sp.fail("❌ ")
+                    print(f"Error pulling image: {str(e)}")
+
     if qf.result['stack_step'] != 'cancel':
         q_reload = inquirer.confirm(message='reload stack', default=True).execute()
         if q_reload:
