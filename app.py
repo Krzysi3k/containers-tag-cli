@@ -29,13 +29,24 @@ def get_images() -> list[str]:
     _ = [ images.extend(i.tags) for i in client.images.list() ]
     sorted_imgs = sorted(images)
 
+    # Load stacks config
+    stacks_config_path = str(Path(__file__).parent / 'stacks_config.json')
+    with open(stacks_config_path, 'r') as f:
+        stacks_config = json.load(f)
+
     rows = []
     for idx, image in enumerate(sorted_imgs):
+        image_name = image.split(":")[0]
+        current_tag = image.split(":")[1]
+        stack_name = "-"
+        for key, path in stacks_config.items():
+            if key in image_name or image_name in key:
+                stack_name = path.split('/')[-1]
+                break
         rows.append(
-            [ f"{idx+1}", image.split(":")[0], image.split(":")[1] ]
+            [ f"{idx+1}", image_name, current_tag, stack_name ]
         )
-    
-    print(tabulate(rows, headers=["Nr", "Image", "Current Tag"], tablefmt="psql"))
+    print(tabulate(rows, headers=["Nr", "Image", "Current Tag", "Stack"], tablefmt="psql"))
     return sorted_imgs
 
 
