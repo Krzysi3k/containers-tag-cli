@@ -1,1 +1,1 @@
-docker inspect (docker ps --format '{{.Names}}') | jq 'map({(.Config.Labels["com.docker.compose.service"]): .Config.Labels["com.docker.compose.project.working_dir"]}) | add' > stacks_config.json
+docker inspect (docker ps --format '{{.Names}}') | jq 'map({(.Config.Labels["com.docker.compose.service"]): .Config.Labels["com.docker.compose.project.working_dir"]}) | add' > /home/krzysiek/automation/docker-tags-cli/stacks_config.json

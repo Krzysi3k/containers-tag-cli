@@ -1,15 +1,18 @@
 {
+  "grafana": "/home/krzysiek/Docker/home-stack",
+  "mqtt-handler-go": "/home/krzysiek/Docker/home-stack",
+  "discord-bot": "/home/krzysiek/Docker/home-stack",
+  "copyparty": "/home/krzysiek/Docker/home-stack",
   "perplexica": "/home/krzysiek/Docker/ai-search-stack",
   "open-webui": "/home/krzysiek/Docker/home-stack/chatops",
   "searxng": "/home/krzysiek/Docker/home-stack/chatops",
-  "cloudflared": "/home/krzysiek/Docker/home-stack/chatops",
   "openwebui-pipelines": "/home/krzysiek/Docker/home-stack/chatops",
-  "grafana": "/home/krzysiek/Docker/home-stack",
-  "mqtt-handler-go": "/home/krzysiek/Docker/home-stack",
+  "cloudflared": "/home/krzysiek/Docker/home-stack/chatops",
   "nginx": "/home/krzysiek/Docker/home-stack",
+  "memos": "/home/krzysiek/Docker/home-stack",
   "nodered": "/home/krzysiek/Docker/home-stack",
   "mosquitto": "/home/krzysiek/Docker/home-stack",
-  "discord-bot": "/home/krzysiek/Docker/home-stack",
   "prometheus": "/home/krzysiek/Docker/home-stack",
-  "memos": "/home/krzysiek/Docker/home-stack"
+  "beszel-agent": "/home/krzysiek/Docker/home-stack",
+  "beszel": "/home/krzysiek/Docker/home-stack"
 }
