@@ -100,6 +100,10 @@ def fetch_tags(images: list[str], page_size=100) -> list[ImageTag]:
                         tags = [tag['name'] for tag in r2.json()]
                     else:
                         tags = []
+
+                if 'open-terminal' in path:
+                    tags = [ t.replace('v', '') for t in tags ]
+                
             else:
                 # For non-GHCR images, get from Docker Hub API
                 if '/' not in img_name:
