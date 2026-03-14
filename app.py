@@ -51,29 +51,70 @@ def get_images() -> list[str]:
 
 
 def fetch_tags(images: list[str], page_size=100) -> list[ImageTag]:
-    ignored_file = str(Path(__file__).parent) + '/.imageignore'
-    with open(ignored_file, 'r') as ignored_file:
-        images_ignored = ignored_file.read().split('\n')
+    ignored_file_path = Path(__file__).parent / '.imageignore'
+    with open(ignored_file_path, 'r') as f:
+        images_ignored = f.read().splitlines()
     image_tags = []
     with yaspin(Spinners.sand, text="") as sp:
         for image in images:
-            image_library = image.split(':')[0]
-            if image_library in images_ignored:
+            img_name, curr_tag = image.split(':')
+
+            # Skip ignored images
+            if img_name in images_ignored:
                 continue
-            if '/' not in image_library:
-                image_library = f'library/{image_library}'
-            sp.color, sp.text = 'white', f'fetching tags for: {image_library}'
-            if 'ghcr.io' in image_library:
-                image_library = image.split('/')[1]
-                r = requests.get(f'https://api.github.com/repos/{image_library}/{image_library}/tags?per_page=100')
-                content = json.loads(r.content)
-                tags = [ i['name'] for i in content ]
+
+            # Determine where to fetch tags from
+            if 'ghcr.io' in img_name:
+                # GHCR image format: ghcr.io/owner/repo
+                # Strip 'ghcr.io/' prefix
+                path = img_name.split('/', 1)[1]  # owner/repo
+                sp.color, sp.text = 'white', f'fetching container registry tags for: {img_name}'
+
+                # Fetch tags from GHCR Docker registry API
+                # API docs: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#listing-image-tags
+                # GHCR registry API for tags: https://ghcr.io/v2/{owner}/{repo}/tags/list
+
+                url = f'https://ghcr.io/v2/{path}/tags/list'
+                r = requests.get(url)
+                if r.status_code == 200:
+                    content = r.json()
+                    tags = content.get('tags', [])
+                    if not tags:
+                        # fallback to git tags if container tags are empty
+                        # sp.text = f'No container tags for {img_name}, fetching git tags...'
+                        owner, repo = path.split('/')
+                        git_url = f'https://api.github.com/repos/{owner}/{repo}/tags?per_page=100'
+                        r2 = requests.get(git_url)
+                        if r2.status_code == 200:
+                            git_tags = [tag['name'] for tag in r2.json()]
+                            tags = git_tags
+                        else:
+                            tags = []
+                else:
+                    # fallback to git tags if request failed
+                    # sp.text = f'Failed container registry request for {img_name}, fetching git tags...'
+                    owner, repo = path.split('/')
+                    git_url = f'https://api.github.com/repos/{owner}/{repo}/tags?per_page=100'
+                    r2 = requests.get(git_url)
+                    if r2.status_code == 200:
+                        tags = [tag['name'] for tag in r2.json()]
+                    else:
+                        tags = []
             else:
+                # For non-GHCR images, get from Docker Hub API
+                if '/' not in img_name:
+                    image_library = f'library/{img_name}'
+                else:
+                    image_library = img_name
+                sp.color, sp.text = 'white', f'fetching tags for: {image_library}'
                 api_url = f'https://hub.docker.com/v2/repositories/{image_library}/tags?page_size={page_size}'
                 r = requests.get(api_url)
-                content = json.loads(r.content)
-                tags = [ i['name'] for i in content['results'] ]
-            img_name, curr_tag = image.split(':')
+                if r.status_code == 200:
+                    content = r.json()
+                    tags = [i['name'] for i in content.get('results', [])]
+                else:
+                    tags = []
+
             image_tags.append(
                 ImageTag(
                     image_name=img_name,
@@ -157,6 +198,7 @@ def main():
                         print(line, end='')
                 if p.returncode != 0:
                     raise CalledProcessError(p.returncode, p.args)
+
 
 if __name__ == '__main__':
     try:
