@@ -21,9 +21,13 @@ for project in $projects
         set args $args -f $f
     end
 
-    # only images declared in the compose files (no `image:` => skipped)
+    # images declared in the compose files (`image:`), plus base images passed
+    # as build args named *_IMAGE (e.g. MCPHUB_IMAGE: samanhappy/mcphub:1.1.5)
     docker compose --project-directory $workdir $args config --format json 2>/dev/null \
-        | jq --arg dir $workdir '[.services[] | select(.image != null) | {key: (.image | sub(":[^:/]*$"; "")), value: $dir}]' \
+        | jq --arg dir $workdir '[.services[]
+            | ([.image] + [(.build.args // {}) | to_entries[] | select(.key | test("_IMAGE$")) | .value])
+            | .[] | select(type == "string")
+            | {key: sub(":[^:/]*$"; ""), value: $dir}]' \
         | read -z -l json
     set entries $entries $json
 end
